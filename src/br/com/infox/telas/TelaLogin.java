@@ -2,6 +2,7 @@ package br.com.infox.telas;
 
 import java.sql.*;
 import br.com.infox.dal.ModuloCanexao;
+import java.awt.Color;
 import javax.swing.JOptionPane;
 
 /**
@@ -9,11 +10,11 @@ import javax.swing.JOptionPane;
  * @author zorinos
  */
 public class TelaLogin extends javax.swing.JFrame {
-    
+
     Connection conexao = null;
     PreparedStatement pst = null;
     ResultSet rs = null;
-    
+
     public void logar() {
         String sql = "select * from tbusuario where login=? and senha=?";
         try {
@@ -28,19 +29,35 @@ public class TelaLogin extends javax.swing.JFrame {
             rs = pst.executeQuery();
             // Se existir usuario e senha correspondente
             if (rs.next()) {
-                TelaPrincipal principal = new TelaPrincipal();
-                principal.setVisible(true);
-                this.dispose();
-                conexao.close();
+                // A linha abaixo obtem o conteudo do compo perfil
+                String perfil = rs.getString(6);
+                //System.out.println(perfil);
+                if (perfil.equals("admin")) {
+                    TelaPrincipal principal = new TelaPrincipal();
+                    principal.setVisible(true);
+                    TelaPrincipal.menRel.setEnabled(true);
+                    TelaPrincipal.menCadUsu.setEnabled(true);
+                    TelaPrincipal.lblUsuario.setText(rs.getString(2));
+                    TelaPrincipal.lblUsuario.setForeground(Color.red);
+                    
+                    this.dispose();
+                    //conexao.close();
+                } else {
+                    TelaPrincipal principal = new TelaPrincipal();
+                    principal.setVisible(true);
+                    TelaPrincipal.lblUsuario.setText(rs.getString(2));
+                    this.dispose();
+                }
+
             } else {
                 JOptionPane.showMessageDialog(null, "Usuário e/ou senha invalidos!");
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e);
-            
+
         }
     }
-    
+
     public TelaLogin() {
         initComponents();
         conexao = ModuloCanexao.conector();
